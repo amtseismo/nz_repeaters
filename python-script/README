@@ -1,0 +1,111 @@
+This directory contains a Python script to evaluate the Hikurangi
+subduction interface geometry at user-specified points, along with several
+configuration files (*.cfg) to demonstrate the use of the script.
+This is an electronic supplement for the SRL paper:
+
+Revised Interface Geometry for the Hikurangi Subduction Zone, New Zealand
+by C. A. Williams et al., accepted June, 2013.
+
+The Python script has the following dependencies:
+numpy
+scipy
+shapely
+pyproj
+pythia
+
+The contents of the subdirectory are as follows:
+data/bounds_local.txt:	A file defining the valid region boundary in the
+			local coordinate system (used by Python script).
+data/datasets_rbf_params_s027.npz:	Bicubic spline parameters in Python
+					npz format used by the script.
+data/datasets_rbf_params_s027.txt:	Bicubic spline parameters in
+					human-readable format.
+data/nzcoast_full_nztm.vtk:	New Zealand coastline in NZTM coordinates in
+				VTK format (useful for 3D visualization).
+data/pm291_wgs84.txt:	Geographic coordinates used to sample the interface
+			for the profile example.
+data/reyners_nztm.txt:	Coordinates defining the profiles from Reyners
+			et al. (2011), used to sample the interface in
+			another example.
+
+Using the Python script:
+As mentioned previously, the script is dependent on several other Python
+packages, which must be installed before use. The script is controlled by
+the .cfg files.  By default, it reads the surf_eval.cfg file, which should
+contain parameters that are rarely changed.  Additional parameters can be
+set in additional .cfg files.  To use these parameters, simply call the
+script as follows:
+
+./surf_eval.py se_xxx.cfg
+
+where the se_xxx.cfg should be replaced by one of the additional .cfg files.
+This will call the script with the default parameters augmented/overwritten
+by the additional parameters in the se_xxx.cfg file.  The .cfg files are
+documented, to show what the various parameter settings are.  You can get
+additional parameter information by using the --help-properties flag:
+
+./surf_eval.py se_xxx.cfg --help-properties
+
+This will print all of the parameters including information on where the
+values were assigned.
+
+Output from the Python script is tab-delimited ASCII format and/or VTK
+format.  The VTK files are useful for 3D visualization packages such as
+ParaView.  Note that the VTK output is just a series of unconnected points.
+To see the surface, you will have to visualize the points using glyphs or
+some other method.
+
+The example .cfg files are:
+
+se_grid_exclude_nztm.cfg:	Parameters to produce output for a regular
+				grid of points in NZTM coordinates. Points
+				outside the valid boundaries are excluded.
+				Both VTK and text output are produced, and
+				surface normals are computed.
+se_grid_exclude_wgs84.cfg:	Parameters to produce output for a regular
+				grid of points in WGS84 coordinates. Points
+				outside the valid boundaries are excluded.
+				Only text output is produced, and surface
+				normals are not computed.
+se_grid_fill_nztm.cfg:		Parameters to produce output for a regular
+				grid of points in NZTM coordinates. Points
+				outside the valid boundaries are filled with
+				a value of -400000.0. Both VTK and text
+				output are produced, and surface normals are
+				computed.
+se_grid_fill_wgs84.cfg:		Parameters to produce output for a regular
+				grid of points in WGS84 coordinates. Points
+				outside the valid boundaries are filled with
+				a value of nan. Only text output is
+				produced, and surface normals are not
+				computed.
+se_prof_pm291_wgs84.cfg:	Parameters to produce output for a profile
+				of predefined points in WGS84 coordinates.
+				Points outside the valid boundaries are
+				excluded. Only text output is produced, and
+				surface normals are not computed.
+se_reyners_prof_nztm.cfg:	Parameters to produce output for the
+				profiles of Reyners et al. (2011) in NZTM
+				coordinates. Points outside the valid
+				boundaries are excluded. Both VTK and text
+				output are produced, and surface normals are
+				computed. Since data is available in this
+				case, the fit to the profiles is also
+				computed.
+
+There is also a simple shell script to be used with GMT:
+
+mk_grid.sh:			A simple shell script to create a GMT .grd
+				file from an ASCII (x,y,z) file. The
+				command-line arguments are the input (x,y,z)
+				file, the output .grd file, and the sampling
+				increment. The input (x,y,z) file could be
+				produced by running surf_eval.py with either
+				the se_grid_exclude_wgs84.cfg file or the
+				se_grid_fill_wgs84.cfg file.
+
+For any problems or questions concerning this package, please contact:
+
+Charles Williams
+GNS Science
+C.Williams@gns.cri.nz

@@ -1,0 +1,24 @@
+This directory contains a GMT .grd file that samples the interface at a
+0.01 degree sampling interval, as well as a simple script to plot contours
+using the .grd file.
+
+This is an electronic supplement for the SRL paper:
+
+Revised Interface Geometry for the Hikurangi Subduction Zone, New Zealand
+by C. A. Williams et al., accepted June, 2013.
+
+The contents of the directory are as follows:
+bounds_wgs84.txt:	A file defining the valid region boundary in WGS84
+			coordinates (used for plotting).
+contours.txt:		Contours used for plotting.
+mk_contours.sh:		A simple shell script to plot the contours
+			taking as input the name of a GMT .grd file
+			and the name of the PostScript output file.
+grid_exclude_wgs84.grd:	GMT .grd file with interface geometry at
+			0.01 degree resolution. Z-coordinates are in km.
+
+For any problems or questions concerning this package, please contact:
+
+Charles Williams
+GNS Science
+C.Williams@gns.cri.nz
