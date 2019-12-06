@@ -79,10 +79,10 @@ def akirich(strike, dip, rake):
     % and z=up'''
     cosd = lambda x : np.cos( np.deg2rad(x) )
     sind = lambda x : np.sin( np.deg2rad(x) )
-    n=[ sind(dip)*cosd(strike), -sind(dip)*sind(strike), cosd(dip) ]
-    s=[ cosd(rake)*sind(strike)-cosd(dip)*sind(rake)*cosd(strike),
+    n=np.array([ sind(dip)*cosd(strike), -sind(dip)*sind(strike), cosd(dip) ])
+    s=np.array([ cosd(rake)*sind(strike)-cosd(dip)*sind(rake)*cosd(strike),
         cosd(rake)*cosd(strike)+cosd(dip)*sind(rake)*sind(strike),
-        sind(rake)*sind(dip) ]  
+        sind(rake)*sind(dip) ])
     return n, s
 
 slip_file='/Users/amt/Documents/nz_repeaters/g13a_info.out'
@@ -107,11 +107,7 @@ dsinterp=interpolate.griddata(np.array([out_dict['x'],out_dict['y']]).T,out_dict
 teinterp=interpolate.griddata(np.array([out_dict['x'],out_dict['y']]).T,out_dict['U_te']/1000,
                         np.array([centroidx, centroidy]).T)
 
-# plot the mesh
-plt.figure()
-plt.scatter(centroidx, centroidy,s=25,c=dsinterp, cmap='jet')
-plt.axis('equal')
-plt.colorbar()
+
 
 # define repeater location and properties
 relat=-38.3064
@@ -122,7 +118,13 @@ strike=33
 dip=90
 rake=-179
 n,s=akirich(strike,dip,rake)
-plt.plot(rex,rey,'ko')
+
+# plot the mesh
+from mpl_toolkits.mplot3d import Axes3D
+fig=plt.figure()
+ax=fig.add_subplot(111, projection='3d')
+ax.scatter(centroidx, centroidy, centroidz, s=24, c=dsinterp, marker='o')
+ax.scatter(rex,rey,redep,c='red',marker='o')
 
 # Calculate lame parameters
 def lame_params(type1, val1, type2, val2):
@@ -154,10 +156,25 @@ E=dict(xx=0.0, yy=0.0, zz=0.0, xy=0.0, xz=0.0, yz=0.0)
 inds=np.where(slipinterp>0)
 for ii in inds[0]:
     print(ii)
-    tmp = tde.calc_tri_strains([rex], [rey], [redep], (node1x[ii],node1y[ii],node1z[ii]), (node2x[ii],node2y[ii],node2z[ii]), 
-                               (node3x[ii],node3y[ii],node3z[ii]), lame['nu'], ssinterp[ii], teinterp[ii], dsinterp[ii])
+#    tmp = tde.calc_tri_strains([rex], [rey], [redep], (node1x[ii],node1y[ii],node1z[ii]), (node2x[ii],node2y[ii],node2z[ii]), 
+#                               (node3x[ii],node3y[ii],node3z[ii]), lame['nu'], ssinterp[ii], teinterp[ii], dsinterp[ii])
+    tmp = tde.calc_tri_strains([rex], [rey], [redep], (node1x[ii],node2x[ii],node3x[ii]), (node1y[ii],node2y[ii],node3y[ii]), 
+                              (node1z[ii],node2z[ii],node3z[ii]), lame['nu'], ssinterp[ii], teinterp[ii], dsinterp[ii])
     for key in E.keys():
         E[key] += tmp[key]
-    print(tmp)
-    print(E)
 S = tde.strain_to_stress(E, lame['lamda'], lame['G'])
+
+# calculate normal and shear stresses on fault
+ST=np.zeros((3,3))
+ST[0,0]=S['xx'][0]
+ST[1,1]=S['yy'][0]
+ST[2,2]=S['zz'][0]
+ST[0,1]=S['xy'][0]
+ST[1,0]=S['xy'][0]
+ST[0,2]=S['xz'][0]
+ST[2,0]=S['xz'][0]
+ST[1,2]=S['yz'][0]
+ST[2,1]=S['yz'][0]
+
+normalstress=np.dot(np.dot(ST,n.T),n)
+shearstress=np.dot(np.dot(ST,n.T),s)
